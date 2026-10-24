@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5...4.0)
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "Minimum policy version for all subprojects")
 
-project(LowPolyLandscape LANGUAGES CXX)
+project(LowPolyLandscape LANGUAGES C CXX)
 set(CMAKE_TLS_VERIFY OFF)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -23,7 +23,7 @@ FetchContent_MakeAvailable(SFML)
 FetchContent_Declare(
     glm
     GIT_REPOSITORY https://github.com/g-truc/glm.git
-    GIT_TAG 1.0.3
+        GIT_TAG 1.0.3
 )
 FetchContent_MakeAvailable(glm)
 
@@ -34,6 +34,7 @@ target_compile_options(common INTERFACE
   $<$<CXX_COMPILER_ID:MSVC>: /W4>
 )
 
+# Find OpenGL
 find_package(OpenGL REQUIRED)
 
 # Glad (copiato manualmente nella cartella glad/)
@@ -44,6 +45,15 @@ set(GLAD_INCLUDE ${CMAKE_SOURCE_DIR}/glad/include)
 ### Sources and executables ###
 ###############################
 
-add_executable(Tappa01  Tappa01/main.cpp  ${GLAD_SRC})
-target_include_directories(Tappa01 PRIVATE ${GLAD_INCLUDE})
-target_link_libraries(Tappa01 PRIVATE common SFML::Window OpenGL::GL glm::glm-header-only)
+add_library(glad STATIC ${GLAD_SRC})
+target_include_directories(glad PUBLIC ${GLAD_INCLUDE})
+
+add_executable(Tappa01 Tappa01/main.cpp)
+
+target_link_libraries(Tappa01 PRIVATE
+    common
+    SFML::Window
+    OpenGL::GL
+    glm::glm-header-only
+    glad
+)
