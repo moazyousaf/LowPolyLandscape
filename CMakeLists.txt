@@ -48,7 +48,17 @@ set(GLAD_INCLUDE ${CMAKE_SOURCE_DIR}/glad/include)
 add_library(glad STATIC ${GLAD_SRC})
 target_include_directories(glad PUBLIC ${GLAD_INCLUDE})
 
+############################
+### Executables           ###
+############################
+
 add_executable(Tappa01 Tappa01/main.cpp)
+
+add_executable(Tappa02 Tappa02/main.cpp)
+
+############################
+### Linking libraries     ###
+############################
 
 target_link_libraries(Tappa01 PRIVATE
     common
@@ -57,3 +67,12 @@ target_link_libraries(Tappa01 PRIVATE
     glm::glm-header-only
     glad
 )
+
+target_link_libraries(Tappa02 PRIVATE
+    common
+    SFML::Window
+    OpenGL::GL
+    glm::glm-header-only
+    glad
+)
+
