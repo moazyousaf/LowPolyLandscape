@@ -84,6 +84,9 @@ int main() {
         std::cerr << "Errore: GLAD non inizializzato" << std::endl;
         return -1;
     }
+
+    //Abilitazione depth test per la pulizia del buffer
+    glEnable(GL_DEPTH_TEST);
     std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
 
     //Generazione di vertici della griglia (y=0)
