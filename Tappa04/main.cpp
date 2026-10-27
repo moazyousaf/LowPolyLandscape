@@ -84,7 +84,7 @@ int main() {
 
     sf::Window window(
         sf::VideoMode({800u, 600u}),
-        "Low-Poly Landscape - Tappa 3",
+        "Low-Poly Landscape - Tappa 4",
         sf::Style::Default,
         sf::State::Windowed,
         settings
@@ -197,7 +197,7 @@ int main() {
     glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
 
     //Aggiunta wireframe
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     //Loop principale
     while (window.isOpen()) {
