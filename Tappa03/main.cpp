@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
+#include <cmath>
 
 const int N = 20; //griglia 20x20
 
@@ -72,7 +73,7 @@ int main() {
 
     sf::Window window(
         sf::VideoMode({800u, 600u}),
-        "Low-Poly Landscape - Tappa 2",
+        "Low-Poly Landscape - Tappa 3",
         sf::Style::Default,
         sf::State::Windowed,
         settings
@@ -89,14 +90,15 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
 
-    //Generazione di vertici della griglia (y=0)
+    //Generazione di vertici della griglia (con altezza variabile)
     std::vector<float> vertices;
     for(int z = 0; z < N; z++){
         for(int x = 0; x < N; x++){
             float fx = (float)x / (N-1) * 2.0f - 1.0f; //da -1 a +1
             float fz = (float)z / (N-1) * 2.0f - 1.0f;
+            float h = sin(fx * 3.0f) * cos(fz * 3.0f) *0.3f;
             vertices.push_back(fx);
-            vertices.push_back(0.0f); //Piano piatto
+            vertices.push_back(h);
             vertices.push_back(fz);
         }
     }
