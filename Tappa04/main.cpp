@@ -62,6 +62,16 @@ unsigned int createProgram() {
     return prog;
 }
 
+//Restituisce un colore RGB in base all'altezza h
+glm::vec3 altitudeColor(float h){
+    if(h < -0.05f) return glm::vec3(0.1f, 0.3f, 0.8f); //Acqua blu
+    if(h < 0.05f) return glm::vec3(0.8f, 0.7f, 0.4f); //Sabbia giallo
+    if(h < 0.20f) return glm::vec3(0.2f, 0.6f, 0.2f); //Erba verde
+
+    return glm::vec3(0.9f, 0.9f, 0.9f); //Neve bianco
+    
+}
+
 int main() {
     //Crea finestra SFML con contesto OpenGL 4.1 Core
     sf::ContextSettings settings;
@@ -97,9 +107,18 @@ int main() {
             float fx = (float)x / (N-1) * 2.0f - 1.0f; //da -1 a +1
             float fz = (float)z / (N-1) * 2.0f - 1.0f;
             float h = sin(fx * 3.0f) * cos(fz * 3.0f) *0.3f;
+
+            glm::vec3 col = altitudeColor(h);
+
+            //Posizione
             vertices.push_back(fx);
             vertices.push_back(h);
             vertices.push_back(fz);
+
+            //Colore
+            vertices.push_back(col.r);
+            vertices.push_back(col.g);
+            vertices.push_back(col.b);
         }
     }
 
