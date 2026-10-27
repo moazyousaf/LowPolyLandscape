@@ -25,9 +25,10 @@ void main() {
 //Fragment Shader
 const char* fragSrc = R"(
 #version 410 core
+in vec3 fragColor;
 out vec4 outColor;
 void main() {
-    outColor = vec4(0.6, 0.9, 0.6, 1.0);
+    outColor = vec4(fragColor, 1.0);
 }
 )";
 
