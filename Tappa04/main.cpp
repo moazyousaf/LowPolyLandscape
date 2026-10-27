@@ -162,10 +162,15 @@ int main() {
                     indices.size() * sizeof(unsigned int),
                     indices.data(), GL_STATIC_DRAW);
         
-        //Solo posizione con stride di 3 float
+        //Attributo 0: posizione (primi 3 float)
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                              3 * sizeof(float), (void*)0);
+                              6 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
+
+        //Attributo 1: colore (secondi 3 float con offset di 3)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                              6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
     glBindVertexArray(0);
 
     //Costruzione matrici
