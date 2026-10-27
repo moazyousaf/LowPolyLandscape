@@ -199,6 +199,8 @@ int main() {
     //Aggiunta wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    int mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
+
     //Loop principale
     while (window.isOpen()) {
         while (auto event = window.pollEvent()) {
@@ -213,7 +215,6 @@ int main() {
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        int mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
 
         //Disegna i triangoli usando i vertici generati
