@@ -91,9 +91,12 @@ void addTriangle(std::vector<float>&v, glm::vec3 a, glm::vec3 b, glm::vec3 c){
     //La normale della faccia: prodotto vettoriale di due lati
     glm::vec3 normal = glm::normalize(glm::cross(b-a, c-a));
 
+    //Tutta la faccia con un solo colore preso dall'altezza
+    float avgHeight = (a.y + b.y + c.y) / 3.0f;
+    glm::vec3 col = altitudeColor(avgHeight);
+
     glm::vec3 pts[3] = { a, b, c};
     for(int i = 0; i < 3; i++){
-        glm::vec3 col = altitudeColor(pts[i].y);
         v.push_back(pts[i].x); v.push_back(pts[i].y); v.push_back(pts[i].z);
         v.push_back(col.r); v.push_back(col.g); v.push_back(col.b);
         v.push_back(normal.x); v.push_back(normal.y); v.push_back(normal.z); 
@@ -111,7 +114,7 @@ int main() {
 
     sf::Window window(
         sf::VideoMode({800u, 600u}),
-        "Low-Poly Landscape - Tappa 4",
+        "Low-Poly Landscape - Tappa 5",
         sf::Style::Default,
         sf::State::Windowed,
         settings
