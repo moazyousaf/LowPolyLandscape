@@ -85,6 +85,21 @@ glm::vec3 gridPoint(int x, int z){
     return glm::vec3(fx, terrainHeight(fx, fz), fz);
 }
 
+//Aggiunge un triangolo al vettore: 3 vertici, ognuno con posizione, colore e normale
+void addTriangle(std::vector<float>&v, glm::vec3 a, glm::vec3 b, glm::vec3 c){
+    
+    //La normale della faccia: prodotto vettoriale di due lati
+    glm::vec3 normal = glm::normalize(glm::cross(b-a, c-a));
+
+    glm::vec3 pts[3] = { a, b, c};
+    for(int i = 0; i < 3; i++){
+        glm::vec3 col = altitudeColor(pts[i].y);
+        v.push_back(pts[i].x); v.push_back(pts[i].y); v.push_back(pts[i].z);
+        v.push_back(col.r); v.push_back(col.g); v.push_back(col.b);
+        v.push_back(normal.x); v.push_back(normal.y); v.push_back(normal.z); 
+    }
+}
+
 int main() {
     //Crea finestra SFML con contesto OpenGL 4.1 Core
     sf::ContextSettings settings;
@@ -115,51 +130,24 @@ int main() {
 
     //Generazione di vertici della griglia (con altezza variabile)
     std::vector<float> vertices;
-    for(int z = 0; z < N; z++){
-        for(int x = 0; x < N; x++){
-            glm::vec3 p = gridPoint(x, z);
-            glm::vec3 col = altitudeColor(p.y);
-
-            //Posizione
-            vertices.push_back(p.x);
-            vertices.push_back(p.y);
-            vertices.push_back(p.z);
-
-            //Colore
-            vertices.push_back(col.r);
-            vertices.push_back(col.g);
-            vertices.push_back(col.b);
+    for(int z = 0; z < N - 1; z++){
+        for(int x = 0; x < N - 1; x++){
+            glm::vec3 tl = gridPoint(x, z);
+            glm::vec3 tr = gridPoint(x + 1, z);
+            glm::vec3 bl = gridPoint(x, z + 1);
+            glm::vec3 br = gridPoint(x + 1, z + 1);
+            
+            addTriangle(vertices, tl, bl, tr); //triangolo 1
+            addTriangle(vertices, tr, bl, br); //triangolo 2
+            
         }
     }
+    int vertexCount = (int)(vertices.size() / 9); //9 float per vertice
 
-    //Generazione indici (2 triangoli per cella)
-    //  tl---tr
-    //  | \  |
-    //  |  \ |
-    //  bl---br
-    std::vector<unsigned int> indices;
-    for (int z = 0; z < N-1; z++) {
-        for (int x = 0; x < N-1; x++) {
-            unsigned int tl = z*N + x;
-            unsigned int tr = z*N + x+1;
-            unsigned int bl = (z+1)*N + x;
-            unsigned int br = (z+1)*N + x+1;
-
-            indices.push_back(tl);
-            indices.push_back(bl);
-            indices.push_back(tr);
-
-            indices.push_back(tr);
-            indices.push_back(bl);
-            indices.push_back(br);
-        }
-    }
-
-    //VAO + VBO + EBO
-    unsigned int VAO, VBO, EBO;
+    //VAO + VBO
+    unsigned int VAO, VBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -167,20 +155,20 @@ int main() {
                     vertices.size() * sizeof(float),
                     vertices.data(), GL_STATIC_DRAW);
         
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
-                    indices.size() * sizeof(unsigned int),
-                    indices.data(), GL_STATIC_DRAW);
-        
-        //Attributo 0: posizione (primi 3 float)
+        //Attributo 0: posizione
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                              6 * sizeof(float), (void*)0);
+                              9 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
 
-        //Attributo 1: colore (secondi 3 float con offset di 3)
+        //Attributo 1: colore
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                              6 * sizeof(float), (void*)(3 * sizeof(float)));
+                              9 * sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
+
+        //Attributo 2: normale
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
+                              9 * sizeof(float), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(2);
     glBindVertexArray(0);
 
     //Costruzione matrici
@@ -226,16 +214,14 @@ int main() {
         glBindVertexArray(VAO);
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
 
-        //Disegna i triangoli usando i vertici generati
-        glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, 0);
-
+        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+        
         window.display();
     }
 
     //Cleanup
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
     return 0;
 }
