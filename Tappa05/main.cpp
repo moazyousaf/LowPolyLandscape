@@ -73,6 +73,18 @@ glm::vec3 altitudeColor(float h){
     
 }
 
+//Altezza del terreno in un punto (x, z)
+float terrainHeight(float x, float z){
+    return sin(x * 3.0f) * cos(z * 3.0f) *0.3f;
+}
+
+//Punto 3D della griglia alla posizione (x, z) in indici interi
+glm::vec3 gridPoint(int x, int z){
+    float fx = (float)x / (N-1) * 2.0f - 1.0f;
+    float fz = (float)z / (N-1) * 2.0f - 1.0f;
+    return glm::vec3(fx, terrainHeight(fx, fz), fz);
+}
+
 int main() {
     //Crea finestra SFML con contesto OpenGL 4.1 Core
     sf::ContextSettings settings;
@@ -105,16 +117,13 @@ int main() {
     std::vector<float> vertices;
     for(int z = 0; z < N; z++){
         for(int x = 0; x < N; x++){
-            float fx = (float)x / (N-1) * 2.0f - 1.0f; //da -1 a +1
-            float fz = (float)z / (N-1) * 2.0f - 1.0f;
-            float h = sin(fx * 3.0f) * cos(fz * 3.0f) *0.3f;
-
-            glm::vec3 col = altitudeColor(h);
+            glm::vec3 p = gridPoint(x, z);
+            glm::vec3 col = altitudeColor(p.y);
 
             //Posizione
-            vertices.push_back(fx);
-            vertices.push_back(h);
-            vertices.push_back(fz);
+            vertices.push_back(p.x);
+            vertices.push_back(p.y);
+            vertices.push_back(p.z);
 
             //Colore
             vertices.push_back(col.r);
