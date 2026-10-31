@@ -32,7 +32,8 @@ in vec3 fragColor;
 in vec3 fragNormal;
 out vec4 outColor;
 void main() {
-    outColor = vec4(fragColor, 1.0);
+    float ambient = 0.3;
+    outColor = vec4(fragColor * ambient, 1.0);
 }
 )";
 
