@@ -30,10 +30,15 @@ const char* fragSrc = R"(
 #version 410 core
 in vec3 fragColor;
 in vec3 fragNormal;
+uniform vec3 lightDir; //Direzione in cui viaggia la luce
 out vec4 outColor;
 void main() {
+    vec3 n = normalize(fragNormal);
+
     float ambient = 0.3;
-    outColor = vec4(fragColor * ambient, 1.0);
+    float diffuse = max(dot(n, -lightDir), 0.0);
+
+    outColor = vec4(fragColor * (ambient + diffuse), 1.0);
 }
 )";
 
@@ -205,6 +210,12 @@ int main() {
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     int mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
+
+    int lightLoc = glGetUniformLocation(shaderProgram, "lightDir");
+    glm::vec3 lightDir = glm::normalize(glm::vec3(-0.5f, -1.0f, -0.3f));
+
+    glUseProgram(shaderProgram);
+    glUniform3fv(lightLoc, 1, glm::value_ptr(lightDir));
 
     //Loop principale
     while (window.isOpen()) {
