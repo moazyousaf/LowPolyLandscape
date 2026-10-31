@@ -35,7 +35,7 @@ out vec4 outColor;
 void main() {
     vec3 n = normalize(fragNormal);
 
-    float ambient = 0.3;
+    float ambient = 0.2;
     float diffuse = max(dot(n, -lightDir), 0.0);
 
     outColor = vec4(fragColor * (ambient + diffuse), 1.0);
@@ -212,7 +212,7 @@ int main() {
     int mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
 
     int lightLoc = glGetUniformLocation(shaderProgram, "lightDir");
-    glm::vec3 lightDir = glm::normalize(glm::vec3(-0.5f, -1.0f, -0.3f));
+    glm::vec3 lightDir = glm::normalize(glm::vec3(0.7f, -1.0f, -0.3f));
 
     glUseProgram(shaderProgram);
     glUniform3fv(lightLoc, 1, glm::value_ptr(lightDir));
