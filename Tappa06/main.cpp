@@ -14,11 +14,14 @@ const char* vertSrc = R"(
 #version 410 core
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aColor;
+layout(location = 2) in vec3 aNormal;
 uniform mat4 MVP;
 out vec3 fragColor;
+out vec3 fragNormal;
 void main() {
     gl_Position = MVP * vec4(aPos, 1.0);
     fragColor = aColor;
+    fragNormal = aNormal;
 }
 )";
 
@@ -26,6 +29,7 @@ void main() {
 const char* fragSrc = R"(
 #version 410 core
 in vec3 fragColor;
+in vec3 fragNormal;
 out vec4 outColor;
 void main() {
     outColor = vec4(fragColor, 1.0);
@@ -114,7 +118,7 @@ int main() {
 
     sf::Window window(
         sf::VideoMode({800u, 600u}),
-        "Low-Poly Landscape - Tappa 5",
+        "Low-Poly Landscape - Tappa 6",
         sf::Style::Default,
         sf::State::Windowed,
         settings
