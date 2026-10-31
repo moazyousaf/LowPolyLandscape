@@ -62,6 +62,8 @@ add_executable(Tappa04 Tappa04/main.cpp)
 
 add_executable(Tappa05 Tappa05/main.cpp)
 
+add_executable(Tappa06 Tappa06/main.cpp)
+
 ############################
 ### Linking libraries     ###
 ############################
@@ -99,6 +101,14 @@ target_link_libraries(Tappa04 PRIVATE
 )
 
 target_link_libraries(Tappa05 PRIVATE
+    common
+    SFML::Window
+    OpenGL::GL
+    glm::glm-header-only
+    glad
+)
+
+target_link_libraries(Tappa06 PRIVATE
     common
     SFML::Window
     OpenGL::GL
