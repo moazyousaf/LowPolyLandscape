@@ -213,8 +213,12 @@ int main() {
     glUseProgram(shaderProgram);
     glUniform3fv(lightLoc, 1, glm::value_ptr(lightDir));
 
+    sf::Clock clock;
+    float speed = 1.5f; //al secondo
+
     //Loop principale
     while (window.isOpen()) {
+        float dt = clock.restart().asSeconds();
         while (auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>())
                 window.close();
@@ -231,6 +235,13 @@ int main() {
         front.y = sin(glm::radians(pitch));
         front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
         front = glm::normalize(front);
+
+        glm::vec3 right = glm::normalize(glm::cross(front, glm::vec3(0, 1, 0)));
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) cameraPos += front * speed *dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) cameraPos -= front * speed *dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) cameraPos += right * speed *dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) cameraPos -= right * speed *dt;
 
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + front, glm::vec3(0, 1, 0));
         glm::mat4 MVP = projection * view * model;
