@@ -334,18 +334,18 @@ int main() {
     std::srand(42); //seme fisso con scena identica ogni volta
 
     //Alberi
-    float cell = 2.0f / (N - 1); //Lato di una cella della griglia
+    float cell = 2.0f * SIZE / (N - 1); //Lato di una cella della griglia
     for(int z = 0; z < N - 1; z++){
         for(int x = 0; x < N - 1; x++){
             //Punto casuale dentro la cella
-            float fx = (float)x / (N - 1) * 2.0f - 1.0f + randf() * cell;
-            float fz = (float)z / (N - 1) * 2.0f - 1.0f + randf() * cell;
+            float fx = -SIZE + x * cell + randf() * cell;
+            float fz = -SIZE + z * cell + randf() * cell;
             float h = terrainHeight(fx, fz);
 
-            //Solo sull'erba (stesse soglie di altitudeColor), con probabilità 30%
-            if(h > 0.05f && h < 0.20f && randf() < 0.3f){
-                float scale = 0.8f + 0.6f * randf(); //alberi di altezze diverse
-                addTree(objVertices, glm::vec3(fx, h - 0.02f, fz), scale);
+            //Solo sull'erba (stesse soglie di altitudeColor), con probabilità 12%
+            if(h > 0.5f && h < 2.0f && randf() < 0.15f){
+                float scale = 4.0f + 2.0f * randf(); //alberi di altezze diverse
+                addTree(objVertices, glm::vec3(fx, h - 0.01f, fz), scale);
             }
         }
     }
@@ -353,13 +353,13 @@ int main() {
     //Rocce
     for(int z = 0; z < N - 1; z++){
         for(int x = 0; x < N - 1; x++){
-            float fx = (float)x / (N - 1) * 2.0f - 1.0f + randf() * cell;
-            float fz = (float)z / (N - 1) * 2.0f - 1.0f + randf() * cell;
+            float fx = -SIZE + x * cell + randf() * cell;
+            float fz = -SIZE + z * cell + randf() * cell;
             float h = terrainHeight(fx, fz);
 
-            //sopra l'acqua, con probabilità del 8%
-            if(h > 0.0f && randf() < 0.08f){
-                float s = 0.04f + 0.04f * randf();
+            //sopra l'acqua, con probabilità del 5%
+            if(h > 0.0f && randf() < 0.05f){
+                float s = 0.03f + 0.03f * randf();
                 glm::vec3 size(s * 1.5f, s, s * 1.2f); //altezza minore della larghezza
                 addRock(objVertices, glm::vec3(fx, h + s * 0.2f, fz),
                         size, randf() * 2.0f * PI, glm::vec3(0.5f, 0.5f, 0.5f));
