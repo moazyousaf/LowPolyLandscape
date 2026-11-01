@@ -139,6 +139,27 @@ void addColoredTriangle(std::vector<float>& v,
     }
 }
 
+const int SEGMENTS = 6;
+const float PI = 3.14159265f;
+
+//Cono con la base circolare e la punta
+void addCone(std::vector<float>& v, glm::vec3 base,
+            float radius, float height, glm::vec3 col){
+    glm::vec3 apex = base + glm::vec3(0.0f, height, 0.0f);
+
+    for(int i = 0; i < SEGMENTS; i++){
+        float a0 = 2.0f * PI * i / SEGMENTS;
+        float a1 = 2.0f * PI * (i + 1) / SEGMENTS;
+
+        glm::vec3 p0 = base + glm::vec3(radius * cos(a0), 0.0f, radius * sin(a0));
+        glm::vec3 p1 = base + glm::vec3(radius * cos(a1), 0.0f, radius * sin(a1));
+        
+        //Un triangolo laterale per ogni segmento
+        addColoredTriangle(v, p0, apex, p1, col);
+    }
+    
+} 
+
 //Crea VAO e VBO per un vettore di vertici (9 float: posizione, colore, normale)
 void createMesh(const std::vector<float>& v, unsigned int& vao, unsigned int& vbo) {
     glGenVertexArrays(1, &vao);
@@ -231,6 +252,15 @@ int main() {
 
     unsigned int waterVAO, waterVBO;
     createMesh(waterVertices, waterVAO, waterVBO);
+
+    //Oggetti della scena (alberi e rocce): un unico vettore di vertici
+    std::vector<float> objVertices;
+    addCone(objVertices, glm::vec3(0.0f, terrainHeight(0.0f, 0.0f), 0.0f),
+            0.05f, 0.14f, glm::vec3(0.1f, 0.45f, 0.15f));
+    int objCount = (int)(objVertices.size() / 9);
+
+    unsigned int objVAO, objVBO;
+    createMesh(objVertices, objVAO, objVBO);
 
     //Costruzione matrici
     glm::mat4 model = glm::mat4(1.0f);
@@ -340,6 +370,9 @@ int main() {
 
         glBindVertexArray(waterVAO);
         glDrawArrays(GL_TRIANGLES, 0, waterCount); 
+
+        glBindVertexArray(objVAO);
+        glDrawArrays(GL_TRIANGLES, 0, objCount);
         
         window.display();
     }
@@ -350,5 +383,7 @@ int main() {
     glDeleteProgram(shaderProgram);
     glDeleteVertexArrays(1, &waterVAO);
     glDeleteBuffers(1, &waterVBO);
+    glDeleteVertexArrays(1, &objVAO);
+    glDeleteBuffers(1, &objVBO);
     return 0;
 }
