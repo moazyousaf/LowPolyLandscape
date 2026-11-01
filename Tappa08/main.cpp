@@ -236,7 +236,8 @@ int main() {
     );
     
     unsigned int shaderProgram = createProgram();
-    glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+    glm::vec3 skyColor(0.6f, 0.75f, 0.9f); //azzurro chiaro
+    glClearColor(skyColor.r, skyColor.g, skyColor.b, 1.0f);
 
     //Aggiunta wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
