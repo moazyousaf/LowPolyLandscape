@@ -113,6 +113,20 @@ void addTriangle(std::vector<float>&v, glm::vec3 a, glm::vec3 b, glm::vec3 c){
     }
 }
 
+//addTriangle con colore arbitrario per l'acqua
+void addColoredTriangle(std::vector<float>& v,
+                        glm::vec3 a, glm::vec3 b, glm::vec3 c,
+                        glm::vec3 col) {
+    glm::vec3 normal = glm::normalize(glm::cross(b - a, c - a));
+
+    glm::vec3 pts[3] = { a, b, c };
+    for (int i = 0; i < 3; i++) {
+        v.push_back(pts[i].x); v.push_back(pts[i].y); v.push_back(pts[i].z);
+        v.push_back(col.r);    v.push_back(col.g);    v.push_back(col.b);
+        v.push_back(normal.x); v.push_back(normal.y); v.push_back(normal.z);
+    }
+}
+
 //Crea VAO e VBO per un vettore di vertici (9 float: posizione, colore, normale)
 void createMesh(const std::vector<float>& v, unsigned int& vao, unsigned int& vbo) {
     glGenVertexArrays(1, &vao);
@@ -187,6 +201,24 @@ int main() {
 
     unsigned int VAO, VBO;
     createMesh(vertices, VAO, VBO);
+
+    //Piano d'acqua: un quadrato orizzontale più grande del terreno
+    float waterLevel = 0.0f;
+    float w = 4.0f; //mezza larghezza
+    glm::vec3 waterColor(0.1f, 0.3f, 0.8f);
+
+    glm::vec3 wtl(-w, waterLevel, -w);
+    glm::vec3 wtr( w, waterLevel, -w);
+    glm::vec3 wbl(-w, waterLevel,  w);
+    glm::vec3 wbr( w, waterLevel,  w);
+
+    std::vector<float> waterVertices;
+    addColoredTriangle(waterVertices, wtl, wbl, wtr, waterColor);
+    addColoredTriangle(waterVertices, wtr, wbl, wbr, waterColor);
+    int waterCount = (int)(waterVertices.size() / 9);
+
+    unsigned int waterVAO, waterVBO;
+    createMesh(waterVertices, waterVAO, waterVBO);
 
     //Costruzione matrici
     glm::mat4 model = glm::mat4(1.0f);
@@ -281,6 +313,9 @@ int main() {
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
 
         glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+
+        glBindVertexArray(waterVAO);
+        glDrawArrays(GL_TRIANGLES, 0, waterCount); 
         
         window.display();
     }
@@ -289,5 +324,7 @@ int main() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteProgram(shaderProgram);
+    glDeleteVertexArrays(1, &waterVAO);
+    glDeleteBuffers(1, &waterVBO);
     return 0;
 }
