@@ -8,7 +8,7 @@
 #include <cmath>
 #include <cstdlib>
 
-const int N = 50; //griglia 50x50
+const int N = 40; //griglia 40x40
 const float SIZE = 10.0f;
 
 //Vertex Shader
