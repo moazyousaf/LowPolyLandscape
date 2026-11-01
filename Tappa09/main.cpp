@@ -158,7 +158,37 @@ void addCone(std::vector<float>& v, glm::vec3 base,
         addColoredTriangle(v, p0, apex, p1, col);
     }
     
-} 
+}
+
+//Cilindro (tronco)
+void addCylinder(std::vector<float>& v, glm::vec3 base,
+                float radius, float height, glm::vec3 col){
+    glm::vec3 up(0.0f, height, 0.0f);
+
+    for(int i = 0; i < SEGMENTS; i++){
+        float a0 = 2.0f * PI * i / SEGMENTS;
+        float a1 = 2.0f * PI * (i + 1) / SEGMENTS;
+
+        glm::vec3 p0b = base + glm::vec3(radius * cos(a0), 0.0f, radius * sin(a0));
+        glm::vec3 p1b = base + glm::vec3(radius * cos(a1), 0.0f, radius * sin(a1));
+        glm::vec3 p0t = p0b + up;
+        glm::vec3 p1t = p1b + up;
+
+        //Il lato di ogni segmento è un rettangolo, ovvero 2 triangoli
+        addColoredTriangle(v, p0b, p0t, p1b, col);
+        addColoredTriangle(v, p1b, p0t, p1t, col);
+    }
+}
+
+//Albero
+void addTree(std::vector<float>& v, glm::vec3 base, float scale){
+    glm::vec3 brown(0.4f, 0.25f, 0.1f);
+    glm::vec3 green(0.1f, 0.45f, 0.15f);
+
+    addCylinder(v, base, 0.012f * scale, 0.06f * scale, brown);
+    addCone(v, base + glm::vec3(0.0f, 0.05f * scale, 0.0f),
+            0.05f * scale, 0.15f * scale, green);
+}
 
 //Crea VAO e VBO per un vettore di vertici (9 float: posizione, colore, normale)
 void createMesh(const std::vector<float>& v, unsigned int& vao, unsigned int& vbo) {
@@ -255,8 +285,7 @@ int main() {
 
     //Oggetti della scena (alberi e rocce): un unico vettore di vertici
     std::vector<float> objVertices;
-    addCone(objVertices, glm::vec3(0.0f, terrainHeight(0.0f, 0.0f), 0.0f),
-            0.05f, 0.14f, glm::vec3(0.1f, 0.45f, 0.15f));
+    addTree(objVertices, glm::vec3(0.0f, terrainHeight(0.0f, 0.0f), 0.0f), 1.0f);
     int objCount = (int)(objVertices.size() / 9);
 
     unsigned int objVAO, objVBO;
