@@ -216,6 +216,12 @@ int main() {
     sf::Clock clock;
     float speed = 1.5f; //al secondo
 
+    //cursore
+    window.setMouseCursorVisible(false);
+    sf::Vector2i center(400, 300);
+    sf::Mouse::setPosition(center, window);
+    float sensitivity = 0.05f;
+
     //Loop principale
     while (window.isOpen()) {
         float dt = clock.restart().asSeconds();
@@ -254,6 +260,14 @@ int main() {
         //Limiti di pitch
         if(pitch > 89.0f) pitch = 89.0f;
         if(pitch < -89.0f) pitch = -89.0f;
+
+        //Mouse
+        if(window.hasFocus()){
+            sf::Vector2i mouse = sf::Mouse::getPosition(window);
+            yaw += (mouse.x - center.x) * sensitivity;
+            pitch -= (mouse.y - center.y) * sensitivity; //y dello schermo va verso il basso
+            sf::Mouse::setPosition(center, window);
+        }
 
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + front, glm::vec3(0, 1, 0));
         glm::mat4 MVP = projection * view * model;
