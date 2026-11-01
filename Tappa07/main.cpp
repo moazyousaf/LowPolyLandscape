@@ -186,11 +186,11 @@ int main() {
 
     //Costruzione matrici
     glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(0.0f, 2.0f, 2.5f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
+    
+    //Stato della camera
+    glm::vec3 cameraPos(0.0f, 2.0f, 2.5f);
+    float yaw = -90.0f; //gradi:  -90 = guarda verso -Z
+    float pitch = -40.f; //gradi: negativo = guarda verso il basso 
 
     glm::mat4 projection = glm::perspective(
         glm::radians(45.0f),
@@ -198,11 +198,7 @@ int main() {
         0.1f,
         100.0f
     );
-
-    //Matrice combinata
-    glm::mat4 MVP = projection * view * model;
     
-
     unsigned int shaderProgram = createProgram();
     glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
 
@@ -228,6 +224,16 @@ int main() {
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        //Direzione in cui guarda la camera, ricavata da yaw e pitch
+        glm::vec3 front;
+        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.y = sin(glm::radians(pitch));
+        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front = glm::normalize(front);
+
+        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + front, glm::vec3(0, 1, 0));
+        glm::mat4 MVP = projection * view * model;
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
