@@ -113,6 +113,34 @@ void addTriangle(std::vector<float>&v, glm::vec3 a, glm::vec3 b, glm::vec3 c){
     }
 }
 
+//Crea VAO e VBO per un vettore di vertici (9 float: posizione, colore, normale)
+void createMesh(const std::vector<float>& v, unsigned int& vao, unsigned int& vbo) {
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+
+    glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER,
+                     v.size() * sizeof(float),
+                     v.data(), GL_STATIC_DRAW);
+
+        // Attributo 0: posizione
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                              9 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        // Attributo 1: colore
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                              9 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        // Attributo 2: normale
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
+                              9 * sizeof(float), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+    glBindVertexArray(0);
+}
+
 int main() {
     //Crea finestra SFML con contesto OpenGL 4.1 Core
     sf::ContextSettings settings;
@@ -157,32 +185,8 @@ int main() {
     }
     int vertexCount = (int)(vertices.size() / 9); //9 float per vertice
 
-    //VAO + VBO
     unsigned int VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, 
-                    vertices.size() * sizeof(float),
-                    vertices.data(), GL_STATIC_DRAW);
-        
-        //Attributo 0: posizione
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                              9 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        //Attributo 1: colore
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                              9 * sizeof(float), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-
-        //Attributo 2: normale
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
-                              9 * sizeof(float), (void*)(6 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-    glBindVertexArray(0);
+    createMesh(vertices, VAO, VBO);
 
     //Costruzione matrici
     glm::mat4 model = glm::mat4(1.0f);
