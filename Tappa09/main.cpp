@@ -8,7 +8,8 @@
 #include <cmath>
 #include <cstdlib>
 
-const int N = 20; //griglia 20x20
+const int N = 50; //griglia 50x50
+const float SIZE = 10.0f;
 
 //Vertex Shader
 const char* vertSrc = R"(
@@ -88,9 +89,9 @@ unsigned int createProgram() {
 
 //Restituisce un colore RGB in base all'altezza h
 glm::vec3 altitudeColor(float h){
-    if(h < -0.05f) return glm::vec3(0.1f, 0.3f, 0.8f); //Acqua blu
-    if(h < 0.05f) return glm::vec3(0.8f, 0.7f, 0.4f); //Sabbia giallo
-    if(h < 0.20f) return glm::vec3(0.2f, 0.6f, 0.2f); //Erba verde
+    if(h < -0.5f) return glm::vec3(0.1f, 0.3f, 0.8f); //Acqua blu
+    if(h < 0.5f) return glm::vec3(0.8f, 0.7f, 0.4f); //Sabbia giallo
+    if(h < 2.0f) return glm::vec3(0.2f, 0.6f, 0.2f); //Erba verde
 
     return glm::vec3(0.9f, 0.9f, 0.9f); //Neve bianco
     
@@ -98,13 +99,17 @@ glm::vec3 altitudeColor(float h){
 
 //Altezza del terreno in un punto (x, z)
 float terrainHeight(float x, float z){
-    return sin(x * 3.0f) * cos(z * 3.0f) *0.3f;
+    float hills = sin(x * 0.3f) * cos(z * 0.3f) * 3.0f; //Colline
+    float bumps = sin(x * 0.9f) * cos(z * 0.8f) * 0.5f; //Irregolarità
+    return hills + bumps;
 }
+
 
 //Punto 3D della griglia alla posizione (x, z) in indici interi
 glm::vec3 gridPoint(int x, int z){
-    float fx = (float)x / (N-1) * 2.0f - 1.0f;
-    float fz = (float)z / (N-1) * 2.0f - 1.0f;
+    float step = 2.0f * SIZE / (N - 1);
+    float fx = -SIZE + x * step;
+    float fz = -SIZE + z * step;
     return glm::vec3(fx, terrainHeight(fx, fz), fz);
 }
 
@@ -269,7 +274,7 @@ int main() {
 
     sf::Window window(
         sf::VideoMode({800u, 600u}),
-        "Low-Poly Landscape - Tappa 8",
+        "Low-Poly Landscape - Tappa 9",
         sf::Style::Close | sf::Style::Titlebar,
         sf::State::Windowed,
         settings
@@ -307,7 +312,7 @@ int main() {
 
     //Piano d'acqua: un quadrato orizzontale più grande del terreno
     float waterLevel = 0.0f;
-    float w = 4.0f; //mezza larghezza
+    float w = SIZE * 4.0f;
     glm::vec3 waterColor(0.1f, 0.3f, 0.8f);
 
     glm::vec3 wtl(-w, waterLevel, -w);
@@ -370,10 +375,10 @@ int main() {
     //Costruzione matrici
     glm::mat4 model = glm::mat4(1.0f);
     
-    //Stato della camera
-    glm::vec3 cameraPos(0.0f, 2.0f, 2.5f);
+    //Stato della camera più alta e più indietro
+    glm::vec3 cameraPos(0.0f, 8.0f, 14.0f);
     float yaw = -90.0f; //gradi:  -90 = guarda verso -Z
-    float pitch = -40.f; //gradi: negativo = guarda verso il basso 
+    float pitch = -30.f; //gradi: negativo = guarda verso il basso 
 
     glm::mat4 projection = glm::perspective(
         glm::radians(45.0f),
@@ -403,12 +408,12 @@ int main() {
     int fogEndLoc = glGetUniformLocation(shaderProgram, "fogEnd");
 
     glUniform3fv(fogColorLoc, 1, glm::value_ptr(skyColor));
-    glUniform1f(fogStartLoc, 1.5f);
-    glUniform1f(fogEndLoc, 5.0f);
+    glUniform1f(fogStartLoc, 8.0f);
+    glUniform1f(fogEndLoc, 30.0f);
 
 
     sf::Clock clock;
-    float speed = 1.5f; //al secondo
+    float speed = 6.0f; //al secondo
 
     //cursore
     window.setMouseCursorVisible(false);
