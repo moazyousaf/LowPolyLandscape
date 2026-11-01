@@ -235,6 +235,25 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        //Movimento con frecce
+        float rotSpeed = 60.f; //gradi al secondo
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) yaw -= rotSpeed * dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) yaw += rotSpeed * dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) pitch += rotSpeed * dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) pitch -= rotSpeed * dt;
+
+        //Mouse look
+        if(window.hasFocus()){
+            sf::Vector2i mouse = sf::Mouse::getPosition(window);
+            yaw += (mouse.x - center.x) * sensitivity;
+            pitch -= (mouse.y - center.y) * sensitivity; //y dello schermo va verso il basso
+            sf::Mouse::setPosition(center, window);
+        }
+
+        //Limiti di pitch
+        if(pitch > 89.0f) pitch = 89.0f;
+        if(pitch < -89.0f) pitch = -89.0f;
+
         //Direzione in cui guarda la camera, ricavata da yaw e pitch
         glm::vec3 front;
         front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -242,32 +261,13 @@ int main() {
         front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
         front = glm::normalize(front);
 
-        //Movimento da tastiera con dt
         glm::vec3 right = glm::normalize(glm::cross(front, glm::vec3(0, 1, 0)));
 
+        //Movimento da tastiera con dt
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) cameraPos += front * speed * dt;
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) cameraPos -= front * speed * dt;
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) cameraPos += right * speed * dt;
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) cameraPos -= right * speed * dt;
-
-        //Per guardarsi intorno con le frecce
-        float rotSpeed = 60.f; //gradi al secondo
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) yaw -= rotSpeed * dt;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) yaw += rotSpeed * dt;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) pitch += rotSpeed * dt;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) pitch -= rotSpeed * dt;
-
-        //Limiti di pitch
-        if(pitch > 89.0f) pitch = 89.0f;
-        if(pitch < -89.0f) pitch = -89.0f;
-
-        //Mouse
-        if(window.hasFocus()){
-            sf::Vector2i mouse = sf::Mouse::getPosition(window);
-            yaw += (mouse.x - center.x) * sensitivity;
-            pitch -= (mouse.y - center.y) * sensitivity; //y dello schermo va verso il basso
-            sf::Mouse::setPosition(center, window);
-        }
 
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + front, glm::vec3(0, 1, 0));
         glm::mat4 MVP = projection * view * model;
