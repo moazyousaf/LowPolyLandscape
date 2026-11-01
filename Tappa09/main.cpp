@@ -191,6 +191,40 @@ void addTree(std::vector<float>& v, glm::vec3 base, float scale){
             0.05f * scale, 0.15f * scale, green);
 }
 
+//Rocce
+void addRock(std::vector<float>& v, glm::vec3 pos, glm::vec3 size,
+            float angleY, glm::vec3 col){
+    glm::mat4 M = glm::translate(glm::mat4(1.0f), pos);
+    M = glm::rotate(M, angleY, glm::vec3(0.0f, 1.0f, 0.0f));
+    M = glm::rotate(M, 0.3f, glm::vec3(1.0f, 0.0f, 0.0f));
+    M = glm::scale(M, size);
+
+    //8 angoli del cubo unitario centrato nell'origine
+    glm::vec3 corners[8] = {
+        {-0.5f, -0.5f, -0.5f}, { 0.5f, -0.5f, -0.5f},
+        { 0.5f,  0.5f, -0.5f}, {-0.5f,  0.5f, -0.5f},
+        {-0.5f, -0.5f,  0.5f}, { 0.5f, -0.5f,  0.5f},
+        { 0.5f,  0.5f,  0.5f}, {-0.5f,  0.5f,  0.5f}
+    };
+
+    //Applica la trasformazione ai punti
+    glm::vec3 p[8];
+    for(int i = 0; i < 8; i++)
+        p[i] = glm::vec3(M * glm::vec4(corners[i], 1.0f));
+
+    //Una faccia = 2 triangoli
+    auto quad = [&](int a, int b, int c, int d){
+        addColoredTriangle(v, p[a], p[b], p[c], col);
+        addColoredTriangle(v, p[a], p[c], p[d], col);
+    };
+
+    quad(4, 5, 6, 7); //davanti
+    quad(1, 0, 3, 2); //dietro
+    quad(5, 1, 2, 6); //destra
+    quad(0, 4, 7, 3); //sinistra
+    quad(3, 7, 6, 2); //sopra
+}
+
 //Crea VAO e VBO per un vettore di vertici (9 float: posizione, colore, normale)
 void createMesh(const std::vector<float>& v, unsigned int& vao, unsigned int& vbo) {
     glGenVertexArrays(1, &vao);
@@ -294,6 +328,7 @@ int main() {
     
     std::srand(42); //seme fisso con scena identica ogni volta
 
+    //Alberi
     float cell = 2.0f / (N - 1); //Lato di una cella della griglia
     for(int z = 0; z < N - 1; z++){
         for(int x = 0; x < N - 1; x++){
@@ -306,6 +341,23 @@ int main() {
             if(h > 0.05f && h < 0.20f && randf() < 0.3f){
                 float scale = 0.8f + 0.6f * randf(); //alberi di altezze diverse
                 addTree(objVertices, glm::vec3(fx, h - 0.02f, fz), scale);
+            }
+        }
+    }
+
+    //Rocce
+    for(int z = 0; z < N - 1; z++){
+        for(int x = 0; x < N - 1; x++){
+            float fx = (float)x / (N - 1) * 2.0f - 1.0f + randf() * cell;
+            float fz = (float)z / (N - 1) * 2.0f - 1.0f + randf() * cell;
+            float h = terrainHeight(fx, fz);
+
+            //sopra l'acqua, con probabilità del 8%
+            if(h > 0.0f && randf() < 0.08f){
+                float s = 0.04f + 0.04f * randf();
+                glm::vec3 size(s * 1.5f, s, s * 1.2f); //altezza minore della larghezza
+                addRock(objVertices, glm::vec3(fx, h + s * 0.2f, fz),
+                        size, randf() * 2.0f * PI, glm::vec3(0.5f, 0.5f, 0.5f));
             }
         }
     }
