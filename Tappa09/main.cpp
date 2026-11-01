@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <cmath>
+#include <cstdlib>
 
 const int N = 20; //griglia 20x20
 
@@ -218,6 +219,11 @@ void createMesh(const std::vector<float>& v, unsigned int& vao, unsigned int& vb
     glBindVertexArray(0);
 }
 
+//Generatore numeri casuali tra 0 e 1
+float randf(){
+    return (float)std::rand() / (float)RAND_MAX;
+}
+
 int main() {
     //Crea finestra SFML con contesto OpenGL 4.1 Core
     sf::ContextSettings settings;
@@ -285,7 +291,25 @@ int main() {
 
     //Oggetti della scena (alberi e rocce): un unico vettore di vertici
     std::vector<float> objVertices;
-    addTree(objVertices, glm::vec3(0.0f, terrainHeight(0.0f, 0.0f), 0.0f), 1.0f);
+    
+    std::srand(42); //seme fisso con scena identica ogni volta
+
+    float cell = 2.0f / (N - 1); //Lato di una cella della griglia
+    for(int z = 0; z < N - 1; z++){
+        for(int x = 0; x < N - 1; x++){
+            //Punto casuale dentro la cella
+            float fx = (float)x / (N - 1) * 2.0f - 1.0f + randf() * cell;
+            float fz = (float)z / (N - 1) * 2.0f - 1.0f + randf() * cell;
+            float h = terrainHeight(fx, fz);
+
+            //Solo sull'erba (stesse soglie di altitudeColor), con probabilità 30%
+            if(h > 0.05f && h < 0.20f && randf() < 0.3f){
+                float scale = 0.8f + 0.6f * randf(); //alberi di altezze diverse
+                addTree(objVertices, glm::vec3(fx, h - 0.02f, fz), scale);
+            }
+        }
+    }
+
     int objCount = (int)(objVertices.size() / 9);
 
     unsigned int objVAO, objVBO;
