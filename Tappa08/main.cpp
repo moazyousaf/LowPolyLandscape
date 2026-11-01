@@ -18,10 +18,12 @@ layout(location = 2) in vec3 aNormal;
 uniform mat4 MVP;
 out vec3 fragColor;
 out vec3 fragNormal;
+out vec3 fragPos;
 void main() {
     gl_Position = MVP * vec4(aPos, 1.0);
     fragColor = aColor;
     fragNormal = aNormal;
+    fragPos = aPos; //posizione nel mondo
 }
 )";
 
@@ -30,15 +32,25 @@ const char* fragSrc = R"(
 #version 410 core
 in vec3 fragColor;
 in vec3 fragNormal;
+in vec3 fragPos;
 uniform vec3 lightDir; //Direzione in cui viaggia la luce
+uniform vec3 cameraPos;
+uniform vec3 fogColor;
+uniform float fogStart;
+uniform float fogEnd;
 out vec4 outColor;
 void main() {
     vec3 n = normalize(fragNormal);
 
     float ambient = 0.2;
     float diffuse = max(dot(n, -lightDir), 0.0);
+    vec3 lit = fragColor * (ambient + diffuse);
 
-    outColor = vec4(fragColor * (ambient + diffuse), 1.0);
+    //Nebbia: 0 = nessuna, 1 = solo nebbia
+    float dist = length(fragPos - cameraPos);
+    float fogFactor = clamp((dist - fogStart) / (fogEnd - fogStart), 0.0, 1.0);
+
+    outColor = vec4(mix(lit, fogColor, fogFactor), 1.0);
 }
 )";
 
@@ -250,6 +262,16 @@ int main() {
     glUseProgram(shaderProgram);
     glUniform3fv(lightLoc, 1, glm::value_ptr(lightDir));
 
+    int camLoc = glGetUniformLocation(shaderProgram, "cameraPos");
+    int fogColorLoc = glGetUniformLocation(shaderProgram, "fogColor");
+    int fogStartLoc = glGetUniformLocation(shaderProgram, "fogStart");
+    int fogEndLoc = glGetUniformLocation(shaderProgram, "fogEnd");
+
+    glUniform3fv(fogColorLoc, 1, glm::value_ptr(skyColor));
+    glUniform1f(fogStartLoc, 1.5f);
+    glUniform1f(fogEndLoc, 5.0f);
+
+
     sf::Clock clock;
     float speed = 1.5f; //al secondo
 
@@ -312,6 +334,7 @@ int main() {
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
+        glUniform3fv(camLoc, 1, glm::value_ptr(cameraPos));
 
         glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
