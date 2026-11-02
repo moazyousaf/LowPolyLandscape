@@ -7,6 +7,7 @@
 #include <vector>
 #include <cmath>
 #include <cstdlib>
+#include <algorithm>
 
 const int N = 40; //griglia 40x40
 const float SIZE = 10.0f;
@@ -376,7 +377,7 @@ int main() {
     glm::mat4 model = glm::mat4(1.0f);
     
     //Stato della camera più alta e più indietro
-    glm::vec3 cameraPos(0.0f, 8.0f, 14.0f);
+    glm::vec3 cameraPos(0.0f, 8.0f, 9.0f);
     float yaw = -90.0f; //gradi:  -90 = guarda verso -Z
     float pitch = -30.f; //gradi: negativo = guarda verso il basso 
 
@@ -467,6 +468,14 @@ int main() {
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) cameraPos -= front * speed * dt;
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) cameraPos += right * speed * dt;
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) cameraPos -= right * speed * dt;
+
+        //Limite camera dentro il terreno e sopra la superficie
+        cameraPos.x = glm::clamp(cameraPos.x, -SIZE, SIZE);
+        cameraPos.z = glm::clamp(cameraPos.z, -SIZE, SIZE);
+
+        float groundY = std::max(terrainHeight(cameraPos.x, cameraPos.z), waterLevel);
+        float minY = groundY + 0.5f;
+        if(cameraPos.y < minY) cameraPos.y = minY;     
 
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + front, glm::vec3(0, 1, 0));
         glm::mat4 MVP = projection * view * model;
