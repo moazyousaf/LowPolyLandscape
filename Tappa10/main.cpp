@@ -265,6 +265,7 @@ float randf(){
 }
 
 bool wireframe = false;
+bool fogOn = true;
 
 int main() {
     //Crea finestra SFML con contesto OpenGL 4.1 Core
@@ -433,6 +434,11 @@ int main() {
                 if(key->code == sf::Keyboard::Key::F){
                     wireframe = !wireframe;
                     glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+                }
+                if(key->code == sf::Keyboard::Key::N){
+                    fogOn = !fogOn;
+                    glUniform1f(fogStartLoc, fogOn ? 8.0f  : 10000.0f);
+                    glUniform1f(fogEndLoc,   fogOn ? 30.0f : 20000.0f);
                 }
             }
         }
