@@ -342,7 +342,7 @@ int main() {
             float fz = -SIZE + z * cell + randf() * cell;
             float h = terrainHeight(fx, fz);
 
-            //Solo sull'erba (stesse soglie di altitudeColor), con probabilità 12%
+            //Solo sull'erba (stesse soglie di altitudeColor), con probabilità 15%
             if(h > 0.5f && h < 2.0f && randf() < 0.15f){
                 float scale = 4.0f + 2.0f * randf(); //alberi di altezze diverse
                 addTree(objVertices, glm::vec3(fx, h - 0.01f, fz), scale);
@@ -359,7 +359,7 @@ int main() {
 
             //sopra l'acqua, con probabilità del 5%
             if(h > 0.0f && randf() < 0.05f){
-                float s = 0.03f + 0.03f * randf();
+                float s = 0.03f * SIZE * randf();
                 glm::vec3 size(s * 1.5f, s, s * 1.2f); //altezza minore della larghezza
                 addRock(objVertices, glm::vec3(fx, h + s * 0.2f, fz),
                         size, randf() * 2.0f * PI, glm::vec3(0.5f, 0.5f, 0.5f));
