@@ -312,7 +312,7 @@ int main() {
 
     //Piano d'acqua: un quadrato orizzontale più grande del terreno
     float waterLevel = 0.0f;
-    float w = SIZE * 4.0f;
+    float w = SIZE * 1.2f;
     glm::vec3 waterColor(0.1f, 0.3f, 0.8f);
 
     glm::vec3 wtl(-w, waterLevel, -w);
