@@ -264,6 +264,8 @@ float randf(){
     return (float)std::rand() / (float)RAND_MAX;
 }
 
+bool wireframe = false;
+
 int main() {
     //Crea finestra SFML con contesto OpenGL 4.1 Core
     sf::ContextSettings settings;
@@ -392,9 +394,6 @@ int main() {
     glm::vec3 skyColor(0.6f, 0.75f, 0.9f); //azzurro chiaro
     glClearColor(skyColor.r, skyColor.g, skyColor.b, 1.0f);
 
-    //Aggiunta wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     int mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
 
     int lightLoc = glGetUniformLocation(shaderProgram, "lightDir");
@@ -428,9 +427,14 @@ int main() {
         while (auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>())
                 window.close();
-            if (const auto* key = event->getIf<sf::Event::KeyPressed>())
+            if (const auto* key = event->getIf<sf::Event::KeyPressed>()){
                 if (key->code == sf::Keyboard::Key::Escape)
                     window.close();
+                if(key->code == sf::Keyboard::Key::F){
+                    wireframe = !wireframe;
+                    glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+                }
+            }
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
