@@ -154,7 +154,7 @@ void addColoredTriangle(std::vector<float>& v,
 
 //Triangolo del terreno: colore preso dall'altezza media
 void addTriangle(std::vector<float>&v, glm::vec3 a, glm::vec3 b, glm::vec3 c){
-    float avgHeight = (a.y, b.y, c.y) / 3.0f;
+    float avgHeight = (a.y + b.y + c.y) / 3.0f;
     addColoredTriangle(v, a, b, c, altitudeColor(avgHeight));
 }
 
@@ -401,7 +401,6 @@ int main() {
     createMesh(vertices, VAO, VBO);
     createMesh(waterVertices, waterVAO, waterVBO);
     createMesh(objVertices, objVAO, objVBO);
-    std::cout << vertexCount << " " << waterCount << " " << objCount << std::endl; //check
 
     //Costruzione matrici
     glm::mat4 model = glm::mat4(1.0f);
@@ -514,7 +513,7 @@ int main() {
 
         float groundY = std::max(terrainHeight(cameraPos.x, cameraPos.z), WATER_LEVEL);
         float minY = groundY + EYE_HEIGHT;
-        if(cameraPos.y < minY) cameraPos.y = minY;     
+        if(cameraPos.y < minY) cameraPos.y = minY;
 
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + front, glm::vec3(0, 1, 0));
         glm::mat4 MVP = projection * view * model;
