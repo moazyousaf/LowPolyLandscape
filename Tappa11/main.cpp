@@ -391,7 +391,7 @@ int main() {
         return -1;
     }
 
-    //Abilitazione depth test per la pulizia del buffer
+    //Abilitazione depth test per la gestione della profondità dei pixel
     glEnable(GL_DEPTH_TEST);
     std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
 
@@ -481,8 +481,6 @@ int main() {
             }
         }
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         //Movimento con frecce
         float rotSpeed = 60.f; //gradi al secondo
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) yaw -= rotSpeed * dt;
@@ -528,6 +526,9 @@ int main() {
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + front, glm::vec3(0, 1, 0));
         glm::mat4 MVP = projection * view * model;
 
+        //Pulizia del buffer colore e depth 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP)); //Invio alla GPU della matrice aggiornata
