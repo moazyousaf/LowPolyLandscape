@@ -289,6 +289,88 @@ float randf(){
     return (float)std::rand() / (float)RAND_MAX;
 }
 
+//Punto casuale dentro la cella della griglia (x, z)
+glm::vec2 randomPointInCell(int x, int z){
+    float cell = 2.0f * SIZE / (N - 1); //Lato di una cella della griglia
+    float fx = -SIZE + x * cell + randf() * cell;
+    float fz = -SIZE + z * cell + randf() * cell;
+
+    return glm::vec2(fx, fz);
+}
+
+//Triangoli del terreno
+std::vector<float> buildTerrain(){
+    std::vector<float> v;
+    for(int z = 0; z < N - 1; z++){
+        for(int x = 0; x < N - 1; x++){
+            glm::vec3 tl = gridPoint(x, z);
+            glm::vec3 tr = gridPoint(x + 1, z);
+            glm::vec3 bl = gridPoint(x, z + 1);
+            glm::vec3 br = gridPoint(x + 1, z + 1);
+            
+            addTriangle(v, tl, bl, tr); //triangolo 1
+            addTriangle(v, tr, bl, br); //triangolo 2
+            
+        }
+    }
+    return v;
+}
+
+//Piano d'acqua
+std::vector<float> buildWater(){
+    float w = WATER_SIZE;
+    glm::vec3 waterColor(0.12f, 0.38f, 0.72f);
+
+    glm::vec3 wtl(-w, WATER_LEVEL, -w);
+    glm::vec3 wtr( w, WATER_LEVEL, -w);
+    glm::vec3 wbl(-w, WATER_LEVEL,  w);
+    glm::vec3 wbr( w, WATER_LEVEL,  w);
+
+    std::vector<float> v;
+    addColoredTriangle(v, wtl, wbl, wtr, waterColor);
+    addColoredTriangle(v, wtr, wbl, wbr, waterColor);
+
+    return v;
+}
+
+//Alberi e rocce
+std::vector<float> buildObjects(){
+    std::vector<float> v;
+    std::srand(42); //seme fisso con scena identica ogni volta
+
+    //Alberi
+    for(int z = 0; z < N - 1; z++){
+        for(int x = 0; x < N - 1; x++){
+            //Punto casuale dentro la cella
+            glm::vec2 p = randomPointInCell(x, z);
+            float h = terrainHeight(p.x, p.y);
+
+            //Solo sull'erba (stesse soglie di altitudeColor), con probabilità 15%
+            if(h > 0.5f && h < 2.0f && randf() < TREE_CHANCE){
+                float scale = 4.0f + 2.0f * randf(); //alberi di altezze diverse
+                addTree(v, glm::vec3(p.x, h - 0.01f, p.y), scale);
+            }
+        }
+    }
+
+    //Rocce
+    for(int z = 0; z < N - 1; z++){
+        for(int x = 0; x < N - 1; x++){
+            glm::vec2 p = randomPointInCell(x, z);
+            float h = terrainHeight(p.x, p.y);
+
+            //sopra l'acqua, con probabilità del 5%
+            if(h > WATER_LEVEL && randf() < ROCK_CHANCE){
+                float s = 0.15f + 0.15f * randf(); //dimensione delle rocce tra 0.15 e 0.3
+                glm::vec3 size(s * 1.5f, s, s * 1.2f); //altezza minore della larghezza
+                addRock(v, glm::vec3(p.x, h + s * 0.2f, p.y),
+                        size, randf() * 2.0f * PI, glm::vec3(0.5f, 0.5f, 0.5f));
+            }
+        }
+    }
+    return v;
+}
+
 int main() {
     //Crea finestra SFML con contesto OpenGL 4.1 Core
     sf::ContextSettings settings;
@@ -319,87 +401,20 @@ int main() {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //formula con alpha
-
-    //Generazione di vertici della griglia (con altezza variabile)
-    std::vector<float> vertices;
-    for(int z = 0; z < N - 1; z++){
-        for(int x = 0; x < N - 1; x++){
-            glm::vec3 tl = gridPoint(x, z);
-            glm::vec3 tr = gridPoint(x + 1, z);
-            glm::vec3 bl = gridPoint(x, z + 1);
-            glm::vec3 br = gridPoint(x + 1, z + 1);
-            
-            addTriangle(vertices, tl, bl, tr); //triangolo 1
-            addTriangle(vertices, tr, bl, br); //triangolo 2
-            
-        }
-    }
-    int vertexCount = (int)(vertices.size() / 9); //9 float per vertice
-
-    unsigned int VAO, VBO;
-    createMesh(vertices, VAO, VBO);
-
-    //Piano d'acqua: un quadrato orizzontale più grande del terreno
-    float w = WATER_SIZE;
-    glm::vec3 waterColor(0.12f, 0.38f, 0.72f);
-
-    glm::vec3 wtl(-w, WATER_LEVEL, -w);
-    glm::vec3 wtr( w, WATER_LEVEL, -w);
-    glm::vec3 wbl(-w, WATER_LEVEL,  w);
-    glm::vec3 wbr( w, WATER_LEVEL,  w);
-
-    std::vector<float> waterVertices;
-    addColoredTriangle(waterVertices, wtl, wbl, wtr, waterColor);
-    addColoredTriangle(waterVertices, wtr, wbl, wbr, waterColor);
-    int waterCount = (int)(waterVertices.size() / 9);
-
-    unsigned int waterVAO, waterVBO;
-    createMesh(waterVertices, waterVAO, waterVBO);
-
-    //Oggetti della scena (alberi e rocce): un unico vettore di vertici
-    std::vector<float> objVertices;
     
-    std::srand(42); //seme fisso con scena identica ogni volta
+    std::vector<float> vertices = buildTerrain();
+    std::vector<float> waterVertices = buildWater();
+    std::vector<float> objVertices = buildObjects();
 
-    //Alberi
-    float cell = 2.0f * SIZE / (N - 1); //Lato di una cella della griglia
-    for(int z = 0; z < N - 1; z++){
-        for(int x = 0; x < N - 1; x++){
-            //Punto casuale dentro la cella
-            float fx = -SIZE + x * cell + randf() * cell;
-            float fz = -SIZE + z * cell + randf() * cell;
-            float h = terrainHeight(fx, fz);
-
-            //Solo sull'erba (stesse soglie di altitudeColor), con probabilità 15%
-            if(h > 0.5f && h < 2.0f && randf() < TREE_CHANCE){
-                float scale = 4.0f + 2.0f * randf(); //alberi di altezze diverse
-                addTree(objVertices, glm::vec3(fx, h - 0.01f, fz), scale);
-            }
-        }
-    }
-
-    //Rocce
-    for(int z = 0; z < N - 1; z++){
-        for(int x = 0; x < N - 1; x++){
-            float fx = -SIZE + x * cell + randf() * cell;
-            float fz = -SIZE + z * cell + randf() * cell;
-            float h = terrainHeight(fx, fz);
-
-            //sopra l'acqua, con probabilità del 5%
-            if(h > 0.0f && randf() < ROCK_CHANCE){
-                float s = 0.15f + 0.15f * randf();
-                glm::vec3 size(s * 1.5f, s, s * 1.2f); //altezza minore della larghezza
-                addRock(objVertices, glm::vec3(fx, h + s * 0.2f, fz),
-                        size, randf() * 2.0f * PI, glm::vec3(0.5f, 0.5f, 0.5f));
-            }
-        }
-    }
-
+    int vertexCount = (int)(vertices.size() / 9); //9 float per vertice
+    int waterCount = (int)(waterVertices.size() / 9);
     int objCount = (int)(objVertices.size() / 9);
-    std::cout << vertexCount << " " << waterCount << " " << objCount << std::endl; //check
 
-    unsigned int objVAO, objVBO;
+    unsigned int VAO, VBO, waterVAO, waterVBO, objVAO, objVBO;
+    createMesh(vertices, VAO, VBO);
+    createMesh(waterVertices, waterVAO, waterVBO);
     createMesh(objVertices, objVAO, objVBO);
+    std::cout << vertexCount << " " << waterCount << " " << objCount << std::endl; //check
 
     //Costruzione matrici
     glm::mat4 model = glm::mat4(1.0f);
