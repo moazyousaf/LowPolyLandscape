@@ -9,8 +9,32 @@
 #include <cstdlib>
 #include <algorithm>
 
+// --- Costanti globali ---
 const int N = 40; //griglia 40x40
 const float SIZE = 10.0f;
+
+//Finestra
+const unsigned int WIDTH = 800;
+const unsigned int HEIGHT = 600;
+
+//Acqua
+const float WATER_LEVEL = 0.0f;
+const float WATER_SIZE = SIZE * 1.2f;
+const float WATER_ALPHA = 0.6f;
+
+//Nebbia
+const float FOG_START = 8.0f;
+const float FOG_END = 30.0f;
+
+//Probabilità di generazione degli oggetti
+const float TREE_CHANCE = 0.15f;
+const float ROCK_CHANCE = 0.05f;
+
+//Camera
+const float CAMERA_SPEED = 6.0f;
+const float MOUSE_SENSITIVITY = 0.05f;
+const float EYE_HEIGHT = 0.5f;
+
 
 //Vertex Shader
 const char* vertSrc = R"(
@@ -275,7 +299,7 @@ int main() {
     settings.attributeFlags = sf::ContextSettings::Core;
 
     sf::Window window(
-        sf::VideoMode({800u, 600u}),
+        sf::VideoMode({WIDTH, HEIGHT}),
         "Low-Poly Landscape - Tappa 11",
         sf::Style::Close | sf::Style::Titlebar,
         sf::State::Windowed,
@@ -316,14 +340,13 @@ int main() {
     createMesh(vertices, VAO, VBO);
 
     //Piano d'acqua: un quadrato orizzontale più grande del terreno
-    float waterLevel = 0.0f;
-    float w = SIZE * 1.2f;
+    float w = WATER_SIZE;
     glm::vec3 waterColor(0.12f, 0.38f, 0.72f);
 
-    glm::vec3 wtl(-w, waterLevel, -w);
-    glm::vec3 wtr( w, waterLevel, -w);
-    glm::vec3 wbl(-w, waterLevel,  w);
-    glm::vec3 wbr( w, waterLevel,  w);
+    glm::vec3 wtl(-w, WATER_LEVEL, -w);
+    glm::vec3 wtr( w, WATER_LEVEL, -w);
+    glm::vec3 wbl(-w, WATER_LEVEL,  w);
+    glm::vec3 wbr( w, WATER_LEVEL,  w);
 
     std::vector<float> waterVertices;
     addColoredTriangle(waterVertices, wtl, wbl, wtr, waterColor);
@@ -348,7 +371,7 @@ int main() {
             float h = terrainHeight(fx, fz);
 
             //Solo sull'erba (stesse soglie di altitudeColor), con probabilità 15%
-            if(h > 0.5f && h < 2.0f && randf() < 0.15f){
+            if(h > 0.5f && h < 2.0f && randf() < TREE_CHANCE){
                 float scale = 4.0f + 2.0f * randf(); //alberi di altezze diverse
                 addTree(objVertices, glm::vec3(fx, h - 0.01f, fz), scale);
             }
@@ -363,7 +386,7 @@ int main() {
             float h = terrainHeight(fx, fz);
 
             //sopra l'acqua, con probabilità del 5%
-            if(h > 0.0f && randf() < 0.05f){
+            if(h > 0.0f && randf() < ROCK_CHANCE){
                 float s = 0.15f + 0.15f * randf();
                 glm::vec3 size(s * 1.5f, s, s * 1.2f); //altezza minore della larghezza
                 addRock(objVertices, glm::vec3(fx, h + s * 0.2f, fz),
@@ -388,7 +411,7 @@ int main() {
 
     glm::mat4 projection = glm::perspective(
         glm::radians(45.0f),
-        800.0f / 600.0f,
+        (float)WIDTH / (float)HEIGHT,
         0.1f,
         100.0f
     );
@@ -412,18 +435,16 @@ int main() {
     int alphaLoc = glGetUniformLocation(shaderProgram, "alpha");
 
     glUniform3fv(fogColorLoc, 1, glm::value_ptr(skyColor));
-    glUniform1f(fogStartLoc, 8.0f);
-    glUniform1f(fogEndLoc, 30.0f);
+    glUniform1f(fogStartLoc, FOG_START);
+    glUniform1f(fogEndLoc, FOG_END);
 
 
     sf::Clock clock;
-    float speed = 6.0f; //al secondo
 
     //cursore
     window.setMouseCursorVisible(false);
-    sf::Vector2i center(400, 300);
+    sf::Vector2i center(WIDTH / 2, HEIGHT / 2);
     sf::Mouse::setPosition(center, window);
-    float sensitivity = 0.05f;
 
     bool wireframe = false;
     bool fogOn = true;
@@ -443,8 +464,8 @@ int main() {
                 }
                 if(key->code == sf::Keyboard::Key::N){
                     fogOn = !fogOn;
-                    glUniform1f(fogStartLoc, fogOn ? 8.0f  : 10000.0f);
-                    glUniform1f(fogEndLoc,   fogOn ? 30.0f : 20000.0f);
+                    glUniform1f(fogStartLoc, fogOn ? FOG_START  : 10000.0f);
+                    glUniform1f(fogEndLoc,   fogOn ? FOG_END : 20000.0f);
                 }
             }
         }
@@ -461,8 +482,8 @@ int main() {
         //Mouse look
         if(window.hasFocus()){
             sf::Vector2i mouse = sf::Mouse::getPosition(window);
-            yaw += (mouse.x - center.x) * sensitivity;
-            pitch -= (mouse.y - center.y) * sensitivity; //y dello schermo va verso il basso
+            yaw += (mouse.x - center.x) * MOUSE_SENSITIVITY;
+            pitch -= (mouse.y - center.y) * MOUSE_SENSITIVITY; //y dello schermo va verso il basso
             sf::Mouse::setPosition(center, window);
         }
 
@@ -480,17 +501,17 @@ int main() {
         glm::vec3 right = glm::normalize(glm::cross(front, glm::vec3(0, 1, 0)));
 
         //Movimento da tastiera con dt
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) cameraPos += front * speed * dt;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) cameraPos -= front * speed * dt;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) cameraPos += right * speed * dt;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) cameraPos -= right * speed * dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) cameraPos += front * CAMERA_SPEED * dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) cameraPos -= front * CAMERA_SPEED * dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) cameraPos += right * CAMERA_SPEED * dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) cameraPos -= right * CAMERA_SPEED * dt;
 
         //Limite camera dentro il terreno e sopra la superficie
         cameraPos.x = glm::clamp(cameraPos.x, -SIZE, SIZE);
         cameraPos.z = glm::clamp(cameraPos.z, -SIZE, SIZE);
 
-        float groundY = std::max(terrainHeight(cameraPos.x, cameraPos.z), waterLevel);
-        float minY = groundY + 0.5f;
+        float groundY = std::max(terrainHeight(cameraPos.x, cameraPos.z), WATER_LEVEL);
+        float minY = groundY + EYE_HEIGHT;
         if(cameraPos.y < minY) cameraPos.y = minY;     
 
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + front, glm::vec3(0, 1, 0));
@@ -507,7 +528,7 @@ int main() {
         glBindVertexArray(objVAO);
         glDrawArrays(GL_TRIANGLES, 0, objCount);
 
-        glUniform1f(alphaLoc, 0.65f); //acqua semitrasparente
+        glUniform1f(alphaLoc, WATER_ALPHA); //acqua semitrasparente
         glBindVertexArray(waterVAO);
         glDrawArrays(GL_TRIANGLES, 0, waterCount); 
         
