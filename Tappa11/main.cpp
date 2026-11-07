@@ -279,7 +279,7 @@ int main() {
 
     sf::Window window(
         sf::VideoMode({800u, 600u}),
-        "Low-Poly Landscape - Tappa 10",
+        "Low-Poly Landscape - Tappa 11",
         sf::Style::Close | sf::Style::Titlebar,
         sf::State::Windowed,
         settings
