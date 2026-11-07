@@ -33,15 +33,15 @@ cmake .. -G "MinGW Makefiles"
 cmake --build .
 ```
 
-Gli eseguibili di **tutte** le tappe (`Tappa01`, `Tappa02`, ..., `Tappa10`) vengono creati nella cartella `build/`. Per avviare una tappa, ad esempio l'ultima:
+Gli eseguibili di **tutte** le tappe (`Tappa01`, `Tappa02`, ..., `Tappa11`) vengono creati nella cartella `build/`. Per avviare una tappa, ad esempio l'ultima:
 
 ```bash
-./Tappa10        # su Windows: .\Tappa10.exe
+./Tappa11        # su Windows: .\Tappa11.exe
 ```
 
 Per ricompilare dopo una modifica al codice basta `cmake --build .`. Solo se si modifica il `CMakeLists.txt` va rieseguito anche `cmake ..`.
 
-## Controlli (Tappa10, versione finale)
+## Controlli (Tappa11, versione finale)
 
 | Tasto           | Azione                                             |
 | --------------- | -------------------------------------------------- |
@@ -61,5 +61,5 @@ LowPolyLandscape/
 ├── CMakeLists.txt
 ├── README.md
 ├── glad/                 loader OpenGL 4.1 Core (src/ e include/)
-├── Tappa01/ ... Tappa10/ una cartella per ogni stadio di sviluppo, ognuna con il suo main.cpp
+├── Tappa01/ ... Tappa11/ una cartella per ogni stadio di sviluppo, ognuna con il suo main.cpp
 ```
