@@ -500,11 +500,11 @@ int main() {
 
         glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
-        glBindVertexArray(waterVAO);
-        glDrawArrays(GL_TRIANGLES, 0, waterCount); 
-
         glBindVertexArray(objVAO);
         glDrawArrays(GL_TRIANGLES, 0, objCount);
+
+        glBindVertexArray(waterVAO);
+        glDrawArrays(GL_TRIANGLES, 0, waterCount); 
         
         window.display();
     }
