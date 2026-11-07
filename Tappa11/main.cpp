@@ -12,6 +12,8 @@
 // --- Costanti globali ---
 const int N = 40; //Numero di vertici per lato della griglia
 const float SIZE = 10.0f;
+const int SEGMENTS = 6;
+const float PI = 3.14159265f;
 
 //Finestra
 const unsigned int WIDTH = 800;
@@ -34,6 +36,8 @@ const float ROCK_CHANCE = 0.05f;
 const float CAMERA_SPEED = 6.0f;
 const float MOUSE_SENSITIVITY = 0.05f;
 const float EYE_HEIGHT = 0.5f;
+const float ROTATION_SPEED = 60.f; //gradi al secondo
+
 
 
 //Vertex Shader
@@ -167,9 +171,6 @@ void addTriangle(std::vector<float>&v, glm::vec3 a, glm::vec3 b, glm::vec3 c){
     addColoredTriangle(v, a, b, c, altitudeColor(avgHeight));
 }
 
-const int SEGMENTS = 6;
-const float PI = 3.14159265f;
-
 //Cono con la base circolare e la punta
 void addCone(std::vector<float>& v, glm::vec3 base,
             float radius, float height, glm::vec3 col){
@@ -263,17 +264,17 @@ void createMesh(const std::vector<float>& v, unsigned int& vao, unsigned int& vb
                      v.size() * sizeof(float),
                      v.data(), GL_STATIC_DRAW);
 
-        // Attributo 0: posizione
+        //Attributo 0: posizione
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
                               9 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
 
-        // Attributo 1: colore
+        //Attributo 1: colore
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
                               9 * sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
-        // Attributo 2: normale
+        //Attributo 2: normale
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
                               9 * sizeof(float), (void*)(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
@@ -341,7 +342,7 @@ std::vector<float> buildObjects(){
             glm::vec2 p = randomPointInCell(x, z);
             float h = terrainHeight(p.x, p.y);
 
-            //Solo sull'erba (stesse soglie di altitudeColor), con probabilità 15%
+            //Solo sull'erba (stesse soglie di altitudeColor), con probabilità TREE_CHANCE
             if(h > 0.5f && h < 2.0f && randf() < TREE_CHANCE){
                 float scale = 4.0f + 2.0f * randf(); //alberi di altezze diverse
                 addTree(v, glm::vec3(p.x, h - 0.01f, p.y), scale);
@@ -355,7 +356,7 @@ std::vector<float> buildObjects(){
             glm::vec2 p = randomPointInCell(x, z);
             float h = terrainHeight(p.x, p.y);
 
-            //sopra l'acqua, con probabilità del 5%
+            //sopra l'acqua, con probabilità ROCK_CHANCE
             if(h > WATER_LEVEL && randf() < ROCK_CHANCE){
                 float s = 0.15f + 0.15f * randf(); //dimensione delle rocce tra 0.15 e 0.3
                 glm::vec3 size(s * 1.5f, s, s * 1.2f); //altezza minore della larghezza
@@ -482,11 +483,10 @@ int main() {
         }
 
         //Movimento con frecce
-        float rotSpeed = 60.f; //gradi al secondo
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) yaw -= rotSpeed * dt;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) yaw += rotSpeed * dt;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) pitch += rotSpeed * dt;
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) pitch -= rotSpeed * dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) yaw -= ROTATION_SPEED * dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) yaw += ROTATION_SPEED * dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) pitch += ROTATION_SPEED * dt;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) pitch -= ROTATION_SPEED * dt;
 
         //Mouse look
         if(window.hasFocus()){
