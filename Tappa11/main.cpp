@@ -321,7 +321,7 @@ int main() {
     //Piano d'acqua: un quadrato orizzontale più grande del terreno
     float waterLevel = 0.0f;
     float w = SIZE * 1.2f;
-    glm::vec3 waterColor(0.1f, 0.3f, 0.8f);
+    glm::vec3 waterColor(0.12f, 0.38f, 0.72f);
 
     glm::vec3 wtl(-w, waterLevel, -w);
     glm::vec3 wtr( w, waterLevel, -w);
@@ -506,7 +506,7 @@ int main() {
         glBindVertexArray(objVAO);
         glDrawArrays(GL_TRIANGLES, 0, objCount);
 
-        glUniform1f(alphaLoc, 0.6f); //acqua semitrasparente
+        glUniform1f(alphaLoc, 0.65f); //acqua semitrasparente
         glBindVertexArray(waterVAO);
         glDrawArrays(GL_TRIANGLES, 0, waterCount); 
         
