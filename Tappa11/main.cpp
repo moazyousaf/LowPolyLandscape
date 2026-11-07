@@ -133,7 +133,7 @@ void addTriangle(std::vector<float>&v, glm::vec3 a, glm::vec3 b, glm::vec3 c){
     }
 }
 
-//addTriangle con colore arbitrario per l'acqua
+//addTriangle con colore arbitrario
 void addColoredTriangle(std::vector<float>& v,
                         glm::vec3 a, glm::vec3 b, glm::vec3 c,
                         glm::vec3 col) {
@@ -265,9 +265,6 @@ float randf(){
     return (float)std::rand() / (float)RAND_MAX;
 }
 
-bool wireframe = false;
-bool fogOn = true;
-
 int main() {
     //Crea finestra SFML con contesto OpenGL 4.1 Core
     sf::ContextSettings settings;
@@ -367,7 +364,7 @@ int main() {
 
             //sopra l'acqua, con probabilità del 5%
             if(h > 0.0f && randf() < 0.05f){
-                float s = 0.03f * SIZE * randf();
+                float s = 0.15f + 0.15f * randf();
                 glm::vec3 size(s * 1.5f, s, s * 1.2f); //altezza minore della larghezza
                 addRock(objVertices, glm::vec3(fx, h + s * 0.2f, fz),
                         size, randf() * 2.0f * PI, glm::vec3(0.5f, 0.5f, 0.5f));
@@ -376,6 +373,7 @@ int main() {
     }
 
     int objCount = (int)(objVertices.size() / 9);
+    std::cout << vertexCount << " " << waterCount << " " << objCount << std::endl; //check
 
     unsigned int objVAO, objVBO;
     createMesh(objVertices, objVAO, objVBO);
@@ -426,6 +424,9 @@ int main() {
     sf::Vector2i center(400, 300);
     sf::Mouse::setPosition(center, window);
     float sensitivity = 0.05f;
+
+    bool wireframe = false;
+    bool fogOn = true;
 
     //Loop principale
     while (window.isOpen()) {
