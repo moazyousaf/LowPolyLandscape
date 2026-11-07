@@ -91,7 +91,7 @@ unsigned int createProgram() {
 
 //Restituisce un colore RGB in base all'altezza h
 glm::vec3 altitudeColor(float h){
-    if(h < -0.5f) return glm::vec3(0.1f, 0.3f, 0.8f); //Acqua blu
+    if(h < -0.5f) return glm::vec3(0.2f, 0.3f, 0.35f); //Fondale profondo
     if(h < 0.5f) return glm::vec3(0.8f, 0.7f, 0.4f); //Sabbia giallo
     if(h < 2.0f) return glm::vec3(0.2f, 0.6f, 0.2f); //Erba verde
 
