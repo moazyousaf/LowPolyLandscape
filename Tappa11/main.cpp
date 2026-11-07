@@ -10,7 +10,7 @@
 #include <algorithm>
 
 // --- Costanti globali ---
-const int N = 40; //griglia 40x40
+const int N = 40; //Numero di vertici per lato della griglia
 const float SIZE = 10.0f;
 
 //Finestra
@@ -147,6 +147,7 @@ glm::vec3 gridPoint(int x, int z){
     return glm::vec3(fx, terrainHeight(fx, fz), fz);
 }
 
+//Calcola la normale della faccia per l'illuminazione
 void addColoredTriangle(std::vector<float>& v,
                         glm::vec3 a, glm::vec3 b, glm::vec3 c,
                         glm::vec3 col) {
@@ -293,7 +294,7 @@ glm::vec2 randomPointInCell(int x, int z){
     return glm::vec2(fx, fz);
 }
 
-//Triangoli del terreno
+//Triangoli del terreno: ogni cella quadrata si scompone in 2 triangoli
 std::vector<float> buildTerrain(){
     std::vector<float> v;
     for(int z = 0; z < N - 1; z++){
@@ -311,7 +312,7 @@ std::vector<float> buildTerrain(){
     return v;
 }
 
-//Piano d'acqua
+//Piano d'acqua: superficie orizzontale trasparente
 std::vector<float> buildWater(){
     float w = WATER_SIZE;
     glm::vec3 waterColor(0.12f, 0.38f, 0.72f);
@@ -328,7 +329,7 @@ std::vector<float> buildWater(){
     return v;
 }
 
-//Alberi e rocce
+//Generazione degli oggetti
 std::vector<float> buildObjects(){
     std::vector<float> v;
     std::srand(42); //seme fisso con scena identica ogni volta
@@ -394,8 +395,9 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
 
+    //Combina il colore dell'acqua con quello già presente nel framebuffer
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //formula con alpha
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     std::vector<float> vertices = buildTerrain();
     std::vector<float> waterVertices = buildWater();
@@ -528,7 +530,7 @@ int main() {
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
+        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP)); //Invio alla GPU della matrice aggiornata
         glUniform3fv(camLoc, 1, glm::value_ptr(cameraPos));
         glUniform1f(alphaLoc, 1.0f); //opaco
 
