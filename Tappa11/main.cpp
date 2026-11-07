@@ -296,6 +296,9 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //formula con alpha
+
     //Generazione di vertici della griglia (con altezza variabile)
     std::vector<float> vertices;
     for(int z = 0; z < N - 1; z++){
@@ -503,6 +506,7 @@ int main() {
         glBindVertexArray(objVAO);
         glDrawArrays(GL_TRIANGLES, 0, objCount);
 
+        glUniform1f(alphaLoc, 0.6f); //acqua semitrasparente
         glBindVertexArray(waterVAO);
         glDrawArrays(GL_TRIANGLES, 0, waterCount); 
         
