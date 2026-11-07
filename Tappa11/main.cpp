@@ -41,6 +41,7 @@ uniform vec3 cameraPos;
 uniform vec3 fogColor;
 uniform float fogStart;
 uniform float fogEnd;
+uniform float alpha;
 out vec4 outColor;
 void main() {
     vec3 n = normalize(fragNormal);
@@ -53,7 +54,7 @@ void main() {
     float dist = length(fragPos - cameraPos);
     float fogFactor = clamp((dist - fogStart) / (fogEnd - fogStart), 0.0, 1.0);
 
-    outColor = vec4(mix(lit, fogColor, fogFactor), 1.0);
+    outColor = vec4(mix(lit, fogColor, fogFactor), alpha);
 }
 )";
 
@@ -407,6 +408,7 @@ int main() {
     int fogColorLoc = glGetUniformLocation(shaderProgram, "fogColor");
     int fogStartLoc = glGetUniformLocation(shaderProgram, "fogStart");
     int fogEndLoc = glGetUniformLocation(shaderProgram, "fogEnd");
+    int alphaLoc = glGetUniformLocation(shaderProgram, "alpha");
 
     glUniform3fv(fogColorLoc, 1, glm::value_ptr(skyColor));
     glUniform1f(fogStartLoc, 8.0f);
@@ -494,6 +496,7 @@ int main() {
         glBindVertexArray(VAO);
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
         glUniform3fv(camLoc, 1, glm::value_ptr(cameraPos));
+        glUniform1f(alphaLoc, 1.0f); //opaco
 
         glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
