@@ -108,6 +108,14 @@ unsigned int createProgram() {
     glAttachShader(prog, frag);
     glLinkProgram(prog);
 
+    int ok;
+    glGetProgramiv(prog, GL_LINK_STATUS, &ok);
+    if (!ok) {
+        char log[512];
+        glGetProgramInfoLog(prog, 512, nullptr, log);
+        std::cerr << "Errore linking shader: " << log << std::endl;
+    }
+
     glDeleteShader(vert);
     glDeleteShader(frag);
     return prog;
